@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: tartines/frontend:1.1.0
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 3000
+
+          env:
+            - name: AUTH_SERVICE_URL
+              value: "http://auth-service:8000"
+            - name: ORDER_SERVICE_URL
+              value: "http://order-service:4000/orders"
+            - name: COMMENT_SERVICE_URL
+              value: "http://art-service:4001/comments"

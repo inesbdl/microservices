@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: art-service
+  labels:
+    app: art-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: art-service
+  template:
+    metadata:
+      labels:
+        app: art-service
+    spec:
+      securityContext:
+        runAsUser: 0
+        fsGroup: 0
+      containers:
+        - name: art-service
+          image: tartines/art-service:1.0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4001
+
+          env:
+            - name: DATABASE_URL
+              value: "file:/data/dev.db"
+            - name: JWT_SECRET
+              value: "change-me"
+            - name: PORT
+              value: "4001"
+
+          volumeMounts:
+            - name: art-db-storage
+              mountPath: /data
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4001
+            initialDelaySeconds: 2
+            periodSeconds: 5
+
+      volumes:
+        - name: art-db-storage
+          persistentVolumeClaim:
+            claimName: art-db-pvc
